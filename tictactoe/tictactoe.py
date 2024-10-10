@@ -117,40 +117,35 @@ def minimax(board: list[list[Optional[str]]]) -> Optional[tuple[int, int]]:
         return None
 
     player_to_move: str = player(board)
+    if player_to_move == X:
+        value, move = max_value(board)
+    else:
+        value, move = min_value(board)
 
-    move: tuple[int, int]
-    moves: dict[int, list[tuple[int, int]]] = {}
-    for action in actions(board):
-        if player_to_move == X:
-            value = max_value(result(board, action))
-        else:
-            value = min_value(result(board, action))
-
-        if value not in moves:
-            moves[value] = [action]
-        else:
-            moves[value].append(action)
-
-    return moves.get(max(moves.keys()))[0] if player_to_move == X else moves.get(min(moves.keys()))[0]
+    return move
 
 
-def min_value(board: list[list[Optional[str]]]) -> int:
+def min_value(board: list[list[Optional[str]]]):
     if terminal(board):
         return utility(board)
 
-    value: Union[float, int] = 10
+    value: Union[float, int] = float('inf')
     for action in actions(board):
-        value = min(value, max_value(result(board, action)))
-        # print('min =', value)
-    return value
+        max_val, _ = max_value(result(board, action))
+        if value > max_val:
+            value = max_val
+            move = action
+    return value, move
 
 
-def max_value(board: list[list[Optional[str]]]) -> int:
+def max_value(board: list[list[Optional[str]]]):
     if terminal(board):
         return utility(board)
 
-    value: Union[float, int] = -10
+    value: Union[float, int] = -float('inf')
     for action in actions(board):
-        value = max(value, min_value(result(board, action)))
-        # print('max =', value)
-    return value
+        min_val, _ = min_value(result(board, action))
+        if value < min_val:
+            value = min_val
+            move = action
+    return value, move
