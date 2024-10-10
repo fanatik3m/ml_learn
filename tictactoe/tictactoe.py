@@ -70,7 +70,23 @@ def winner(board: list[list[Optional[str]]]) -> Optional[str]:
     """
     Returns the winner of the game, if there is one.
     """
-    raise NotImplementedError
+    first_element: Optional[str]
+    for row in board:
+        first_element = row[0]
+        if first_element == row[1] == row[2] and first_element:
+            return first_element
+    for i in range(len(board)):
+        row = board[i]
+        first_element = row[0]
+        if first_element == row[1] == row[2] and first_element:
+            return first_element
+
+    middle_element: Optional[str] = board[1][1]
+    if middle_element:
+        if middle_element and (
+                middle_element == board[0][0] == board[2][2] or middle_element == board[0][2] == board[2][0]):
+            return middle_element
+    return None
 
 
 def terminal(board: list[list[Optional[str]]]) -> bool:
