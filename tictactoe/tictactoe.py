@@ -3,6 +3,10 @@ Tic Tac Toe Player
 """
 
 import math
+import copy
+from typing import Optional
+
+from exceptions import InvalidMove
 
 X = "X"
 O = "O"
@@ -18,49 +22,79 @@ def initial_state():
             [EMPTY, EMPTY, EMPTY]]
 
 
-def player(board):
+def player(board: list[list[Optional[str]]]) -> str:
     """
     Returns player who has the next turn on a board.
     """
-    raise NotImplementedError
+    o_moves_count: int = 0
+    x_moves_count: int = 0
+    for row in board:
+        o_moves_count += row.count(O)
+        x_moves_count += row.count(X)
+
+    if x_moves_count > o_moves_count:
+        return O
+    return X
 
 
-def actions(board):
+def actions(board: list[list[Optional[str]]]) -> set:
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    raise NotImplementedError
+    available_actions: set[tuple[int, int]] = set()
+    for index_i, i in enumerate(board):
+        for index_j in range(len(i)):
+            if board[index_i][index_j] == EMPTY:
+                available_actions.add((index_i, index_j))
+    return available_actions
 
 
-def result(board, action):
+def result(board: list[list[Optional[str]]], action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    raise NotImplementedError
+    i, j = action
+    if i >= len(board):
+        raise InvalidMove
+    if j >= len(board[i]):
+        raise InvalidMove
+    if board[i][j] != EMPTY:
+        raise InvalidMove
+
+    new_board: list[list[Optional[str]]] = copy.deepcopy(board)
+    new_board[i][j] = player(board)
+    return new_board
 
 
-def winner(board):
+def winner(board: list[list[Optional[str]]]) -> Optional[str]:
     """
     Returns the winner of the game, if there is one.
     """
     raise NotImplementedError
 
 
-def terminal(board):
+def terminal(board: list[list[Optional[str]]]) -> bool:
     """
     Returns True if game is over, False otherwise.
     """
-    raise NotImplementedError
+    if not sum(row.count(EMPTY) for row in board) or winner(board):
+        return True
+    return False
 
 
-def utility(board):
+def utility(board: list[list[Optional[str]]]) -> int:
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
-    raise NotImplementedError
+    game_winner: str = winner(board)
+    if game_winner == X:
+        return 1
+    if game_winner == O:
+        return -1
+    return 0
 
 
-def minimax(board):
+def minimax(board: list[list[Optional[str]]]):
     """
     Returns the optimal action for the current player on the board.
     """
