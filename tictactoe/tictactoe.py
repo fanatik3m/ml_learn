@@ -135,14 +135,22 @@ def minimax(board: list[list[Optional[str]]]) -> Optional[tuple[int, int]]:
 
 
 def min_value(board: list[list[Optional[str]]]) -> int:
-    value: Union[float, int] = float('inf')
+    if terminal(board):
+        return utility(board)
+
+    value: Union[float, int] = 10
     for action in actions(board):
         value = min(value, max_value(result(board, action)))
+        # print('min =', value)
     return value
 
 
 def max_value(board: list[list[Optional[str]]]) -> int:
-    value: Union[float, int] = -float('inf')
+    if terminal(board):
+        return utility(board)
+
+    value: Union[float, int] = -10
     for action in actions(board):
         value = max(value, min_value(result(board, action)))
+        # print('max =', value)
     return value
