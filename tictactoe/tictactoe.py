@@ -4,7 +4,7 @@ Tic Tac Toe Player
 
 import math
 import copy
-from typing import Optional
+from typing import Optional, Union
 
 from exceptions import InvalidMove
 
@@ -110,8 +110,40 @@ def utility(board: list[list[Optional[str]]]) -> int:
     return 0
 
 
-def minimax(board: list[list[Optional[str]]]):
+def minimax(board: list[list[Optional[str]]]) -> Optional[tuple[int, int]]:
     """
     Returns the optimal action for the current player on the board.
     """
-    raise NotImplementedError
+    if terminal(board):
+        return None
+
+    player_to_move: str = player(board)
+
+    move: tuple[int, int]
+    moves: dict[int, list[tuple[int, int]]] = {}
+    for action in actions(board):
+        if player_to_move == X:
+            move, value = min_value(result(board, action))
+        else:
+            move, value = max_value(result(board, action))
+
+        if value not in moves:
+            moves[value] = [move]
+        else:
+            moves[value].append(move)
+
+    return moves.get(max(moves.keys()))[0] if player_to_move == X else moves.get(min(moves.keys()))[0]
+
+
+def min_value(board: list[list[Optional[str]]]) -> int:
+    value: Union[float, int] = float('inf')
+    for action in actions(board):
+        value = min(value, max_value(result(board, action)))
+    return value
+
+
+def max_value(board: list[list[Optional[str]]]) -> int:
+    value: Union[float, int] = - float('inf')
+    for action in actions(board):
+        value = max(value, min_value(result(board, action)))
+    return value
