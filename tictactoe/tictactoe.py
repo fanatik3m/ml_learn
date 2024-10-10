@@ -76,9 +76,8 @@ def winner(board: list[list[Optional[str]]]) -> Optional[str]:
         if first_element == row[1] == row[2] and first_element:
             return first_element
     for i in range(len(board)):
-        row = board[i]
-        first_element = row[0]
-        if first_element == row[1] == row[2] and first_element:
+        first_element = board[0][i]
+        if first_element == board[1][i] == board[2][i] and first_element:
             return first_element
 
     middle_element: Optional[str] = board[1][1]
@@ -123,14 +122,14 @@ def minimax(board: list[list[Optional[str]]]) -> Optional[tuple[int, int]]:
     moves: dict[int, list[tuple[int, int]]] = {}
     for action in actions(board):
         if player_to_move == X:
-            move, value = min_value(result(board, action))
+            value = max_value(result(board, action))
         else:
-            move, value = max_value(result(board, action))
+            value = min_value(result(board, action))
 
         if value not in moves:
-            moves[value] = [move]
+            moves[value] = [action]
         else:
-            moves[value].append(move)
+            moves[value].append(action)
 
     return moves.get(max(moves.keys()))[0] if player_to_move == X else moves.get(min(moves.keys()))[0]
 
@@ -143,7 +142,7 @@ def min_value(board: list[list[Optional[str]]]) -> int:
 
 
 def max_value(board: list[list[Optional[str]]]) -> int:
-    value: Union[float, int] = - float('inf')
+    value: Union[float, int] = -float('inf')
     for action in actions(board):
         value = max(value, min_value(result(board, action)))
     return value
