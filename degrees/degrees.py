@@ -56,7 +56,8 @@ def load_data(directory):
 def main():
     if len(sys.argv) > 2:
         sys.exit("Usage: python degrees.py [directory]")
-    directory = sys.argv[1] if len(sys.argv) == 2 else "large"
+    # directory = sys.argv[1] if len(sys.argv) == 2 else "large"
+    directory = 'large'
 
     # Load data from files into memory
     print("Loading data...")
@@ -85,7 +86,7 @@ def main():
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
-def shortest_path(source, target) -> Optional[list[tuple[int, int]]]:
+def shortest_path(source, target) -> Optional[list[tuple[str, str]]]:
     """
     Returns the shortest list of (movie_id, person_id) pairs
     that connect the source to the target.
@@ -93,7 +94,7 @@ def shortest_path(source, target) -> Optional[list[tuple[int, int]]]:
     If no possible path, returns None.
     """
 
-    start_node = Node(state=source, parent=None, action='person')
+    start_node = Node(state=source, parent=None, action=None)
     frontier = QueueFrontier()
     frontier.add(start_node)
 
@@ -105,30 +106,25 @@ def shortest_path(source, target) -> Optional[list[tuple[int, int]]]:
             return None
 
         current_node: Node = frontier.remove()
-        if current_node.state == target:
-            return get_person_movie_path(person=current_node)
 
         # add neighbors to frontier
-        person_movies: set[int] = people.get(current_node.state).get('movies')
-        for movie in person_movies:
-            movie_node = Node(state=movie, parent=current_node, action='movie')
-            frontier.add(movie_node)
-
-            stars: set[int] = movies.get(movie).get('stars')
-            for star in stars:
-                if star not in explored:
-                    frontier.add(Node(state=star, parent=movie_node, action='person'))
+        neighbors: set[tuple[str, str]] = neighbors_for_person(current_node.state)
+        for movie_id, person_id in neighbors:
+            if not frontier.contains_state(person_id) and person_id not in explored:
+                node = Node(state=person_id, parent=current_node, action=movie_id)
+                if node.state == target:
+                    return get_person_movie_path(node)
+                frontier.add(node)
 
         # update explored people
         explored.add(current_node.state)
 
 
 def get_person_movie_path(person: Node):
-    path: list[tuple[int, int]] = []  # (movie_id, person_id)
+    path: list[tuple[str, str]] = []  # (movie_id, person_id)
     node: Node = person
     while node.parent:
-        if node.action == 'person':
-            path.append((node.parent.state, node.state))
+        path.append((node.action, node.state))
         node = node.parent
     return path
 
