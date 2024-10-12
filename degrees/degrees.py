@@ -1,5 +1,6 @@
 import csv
 import sys
+from typing import Optional
 
 from util import Node, StackFrontier, QueueFrontier
 
@@ -84,7 +85,7 @@ def main():
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
-def shortest_path(source, target):
+def shortest_path(source, target) -> Optional[list[tuple[int, int]]]:
     """
     Returns the shortest list of (movie_id, person_id) pairs
     that connect the source to the target.
@@ -92,8 +93,44 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-    # TODO
-    raise NotImplementedError
+    start_node = Node(state=source, parent=None, action='person')
+    frontier = QueueFrontier()
+    frontier.add(start_node)
+
+    explored: set[int] = set()
+
+    while True:
+        # no solution if empty frontier
+        if frontier.empty():
+            return None
+
+        current_node: Node = frontier.remove()
+        if current_node.state == target:
+            return get_person_movie_path(person=current_node)
+
+        # add neighbors to frontier
+        person_movies: set[int] = people.get(current_node.state).get('movies')
+        for movie in person_movies:
+            movie_node = Node(state=movie, parent=current_node, action='movie')
+            frontier.add(movie_node)
+
+            stars: set[int] = movies.get(movie).get('stars')
+            for star in stars:
+                if star not in explored:
+                    frontier.add(Node(state=star, parent=movie_node, action='person'))
+
+        # update explored people
+        explored.add(current_node.state)
+
+
+def get_person_movie_path(person: Node):
+    path: list[tuple[int, int]] = []  # (movie_id, person_id)
+    node: Node = person
+    while node.parent:
+        if node.action == 'person':
+            path.append((node.parent.state, node.state))
+        node = node.parent
+    return path
 
 
 def person_id_for_name(name):
